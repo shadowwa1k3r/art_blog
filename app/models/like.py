@@ -1,0 +1,17 @@
+from django.contrib.auth.models import User
+from django.db import models
+
+from app.models import Post
+
+
+class PostLike(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'post_likes'
+
+    def __str__(self):
+        return self.post.title
