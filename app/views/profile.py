@@ -19,8 +19,9 @@ class HomePageView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         last = Post.objects.all().order_by('-created_at').first()
         user_set = User.objects.filter(Q(Q(followed__follower=self.request.user) & Q(followed__status=1)) | Q(username=self.request.user.username))
+        qs = Post.objects.filter(author__in=user_set)
         if last:
-            qs = Post.objects.filter(author__in=user_set).exclude(id=last.id)
+            qs = qs.exclude(id=last.id)
         return qs
 
     def get_context_data(self, **kwargs):
