@@ -14,7 +14,7 @@
 										<div class="user-profile">
 											<div class="username-dt">
 												<div class="usr-pic">
-													<img src="{{ user.profile.photo.url }}" alt="">
+													<img src="{{ user.profile.photo.url|default_if_none:"http://via.placeholder.com/100x100" }}" alt="">
 												</div>
 											</div><!--username-dt end-->
 											<div class="user-specs">
@@ -68,7 +68,7 @@
 								<div class="main-ws-sec">
 									<div class="post-topbar">
 										<div class="user-picy">
-											<img class="post-topbar-img" src="{{ request.user.profile.photo.url }}" alt="">
+											<img class="post-topbar-img" src="{{ request.user.profile.photo.url|default_if_none:"http://via.placeholder.com/50x50" }}" alt="">
 										</div>
 										<div class="post-st">
 											<ul>
@@ -77,6 +77,9 @@
 										</div><!--post-st end-->
 									</div><!--post-topbar end-->
 									<div class="posts-section">
+                                        {% if last %}
+
+
                                         <div class="posty">
 										<div class="post-bar no-margin">
 											<div class="post_topbar">
@@ -168,6 +171,7 @@
 												</div><!--post-comment end-->
 											</div><!--comment-section end-->
                                         </div>
+                                        {% endif %}
 										<div class="top-profiles">
 											<div class="pf-hd">
 												<h3>Top Profiles</h3>
