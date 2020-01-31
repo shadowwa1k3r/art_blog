@@ -48,7 +48,7 @@ class AuthPageView(View):
         return render(request, 'auth/sign-in.html', {'error': True})
 
 
-class MyProfilePageView(ListView):
+class MyProfilePageView(LoginRequiredMixin, ListView):
     template_name = 'profile/my-profile-feed.html'
     model = Post
     context_object_name = 'posts'
@@ -67,7 +67,7 @@ class MyProfilePageView(ListView):
         return context
 
 
-class GuestProfilePage(ListView):
+class GuestProfilePage(LoginRequiredMixin, ListView):
     template_name = 'profile/user-profile.html'
     model = Post
     context_object_name = 'posts'
