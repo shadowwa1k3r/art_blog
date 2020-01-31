@@ -14,6 +14,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     photo = models.ImageField(upload_to='profile/photos/', blank=True, null=True)
     background = models.ImageField(upload_to='profile/background/images/', blank=True, null=True)
+    about = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
