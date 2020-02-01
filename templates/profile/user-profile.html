@@ -97,7 +97,7 @@
 										<div class="infinite-conatainer">
                                         {% for post in posts %}
                                             <div class="posty">
-											<div class="post-bar">
+											<div class="post-bar no-margin">
 												<div class="post_topbar">
 													<div class="usy-dt">
 														<img class="profile-img" src="{{ post.author.profile.photo.url}}" alt="">
@@ -111,17 +111,23 @@
 
 												<div class="job_descp">
 													<h3>{{ post.title }}</h3>
+                                                    <div id="owl-demo" class="owl-carousel owl-theme owl-margin">
+                                                        {% for img in post.postimage_set.all %}
+                                                            <div class="item"><img src="{{ img.image.url }}" alt="Owl Image"></div>
+                                                        {% endfor %}
+                                                    </div>
 
-													<p>{{ post.content|truncatechars:100 }}... <a href="#" title="">view more</a></p>
+													<p>{{ post.content|truncatechars:59 }} <a href="#" title="">view more</a></p>
+
 												</div>
 												<div class="job-status-bar">
 													<ul class="like-com">
 														<li>
-															<a href="#"><i class="la la-heart"></i> Like</a>
+															<a class="like-button" data-id="{{ post.id }}" href="#"><i class="la la-heart"></i> Like</a>
 															<img src="{% static 'images/liked-img.png' %}" alt="">
-															<span>{{post.postlike_set.all|length}}</span>
-														</li> 
-														<li><a href="#" title="" class="com"><img src="{% static 'images/com.png' %}" alt=""> Comment {{post.comment_set.all|length}}</a></li>
+															<span id="like-count{{ post.id }}">{{post.postlike_set.all|length}}</span>
+														</li>
+														<li><a href="#" title="" class="com"><img src="{% static 'images/com.png' %}" alt=""><a class="com" id="comment-count{{ post.id }}" > Comment {{post.comment_set.all|length}}</a></a></li>
 													</ul>
 													<a><i class="la la-eye"></i>{{post.postview_set.all|length}}</a>
 												</div>
@@ -129,7 +135,7 @@
 											<div class="comment-section">
 
 												<div class="comment-sec">
-													<ul>
+													<ul id="comment-box{{ post.id }}" >
                                                         {% for comment in post.comment_set.all %}
 
 
@@ -143,7 +149,7 @@
 																	<h3>{{comment.author.get_full_name|default_if_none:comment.author.username}}</h3>
 																	<span><img src="{% static 'images/clock.png' %}" alt=""> {{comment.created_at}}</span>
 																	<p>{{ comment.content }} </p>
-																	<a href="#" title="" class="active"><i class="fa fa-reply-all"></i>Reply</a>
+{#																	<a href="#" title="" class="active"><i class="fa fa-reply-all"></i>Reply</a>#}
 																</div>
 															</div><!--comment-list end-->
 
@@ -179,13 +185,13 @@
 													</div>
 													<div class="comment_box">
 														<form>
-															<input type="text" placeholder="Post a comment">
-															<button type="submit">Send</button>
+															<input id="comment-text{{ post.id }}" type="text" placeholder="Post a comment">
+															<button data-id="{{ post.id }}" class="comment-send" type="button">Send</button>
 														</form>
 													</div>
 												</div><!--post-comment end-->
 											</div><!--comment-section end-->
-                                            </div><!--posty end-->
+										</div><!--posty end-->
                                         {% endfor %}
                                         </div>
 
@@ -276,4 +282,97 @@
 
 
 
+{% endblock %}
+
+{% block scripts %}
+    <script>
+    $(document).ready(function() {
+
+      $("#owl-demo").owlCarousel({
+
+          autoPlay: 3000, //Set AutoPlay to 3 seconds
+
+          items : 1,
+          itemsDesktop : [1199,3],
+          itemsDesktopSmall : [979,3]
+
+      });
+
+    });
+
+
+
+
+
+
+
+        $(".like-button").click(function (e) {
+        e.preventDefault();
+        var data = new FormData();
+
+        var id = $(this).data('id');
+
+        data.append("post_id", $(this).data('id'));
+
+        $.ajax({
+                          url: '{% url 'post-like-api' %}',
+                          headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                          type: 'POST',
+                          data: data,
+                          processData: false,
+                          contentType: false,
+                          success: function (e) {
+                              console.log(e);
+                            $(`#like-count${id}`).text(e.count);
+                          },
+                          error: function (e) {
+                              {#alert("!");#}
+                          }
+                      })
+    });
+
+
+    $(".comment-send").click(function (e) {
+        var data = new FormData();
+        e.preventDefault();
+        var id = $(this).data('id');
+        data.append("post_id", id);
+        data.append("comment", $(`#comment-text${id}`).val());
+
+        $.ajax({
+                          url: '{% url 'post-comment-api' %}',
+                          headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                          type: 'POST',
+                          data: data,
+                          processData: false,
+                          contentType: false,
+                          success: function (e) {
+                              console.log(e);
+                              $(`#comment-box${id}`).append(`<li>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class="comment-list">
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class="bg-img">
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<img class="comment-img" src="${e.photo}" alt="">
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<div class="comment">
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<h3>${e.author}</h3>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<span><img src="{% static 'images/clock.png' %}" alt=""> {% now "DATETIME_FORMAT" %}</span>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<p>${e.comment} </p>
+{#\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t<a href="#" title="" class="active"><i class="fa fa-reply-all"></i>Reply</a>#}
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div>
+\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t</div><!--comment-list end-->
+                              </li>`);
+
+                              $(`a#comment-count${id}`).text(`Comment ${e.count}`);
+                              $(`#comment-text${id}`).val('');
+
+
+                          },
+                          error: function (e) {
+                              {#alert("!");#}
+                          }
+                      });
+
+    });
+
+    </script>
 {% endblock %}

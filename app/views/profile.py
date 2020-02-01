@@ -1,4 +1,4 @@
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.db.models import Q
@@ -17,17 +17,20 @@ class HomePageView(LoginRequiredMixin, ListView):
     paginate_by = 5
 
     def get_queryset(self):
-        last = Post.objects.all().order_by('-created_at').first()
+
         user_set = User.objects.filter(Q(Q(followed__follower=self.request.user) & Q(followed__status=1)) | Q(username=self.request.user.username))
         qs = Post.objects.filter(author__in=user_set)
-        if last:
-            qs = qs.exclude(id=last.id)
+        if Post.objects.filter(author=self.request.user).count() > 0:
+            last = Post.objects.filter(author=self.request.user).order_by('-created_at').first()
+            if last:
+                qs = qs.exclude(id=last.id)
         return qs
 
     def get_context_data(self, **kwargs):
         context = super(HomePageView, self).get_context_data(**kwargs)
-        last = Post.objects.all().order_by('-created_at').first()
-        context['last'] = last
+        if Post.objects.filter(author=self.request.user).count() > 0:
+            last = Post.objects.filter(author=self.request.user).order_by('-created_at').first()
+            context['last'] = last
         context['user'] = User.objects.get(username=self.request.user.username)
         context['follower_count'] = Relation.objects.filter(followed=self.request.user, status=1).count()
         context['following_count'] = Relation.objects.filter(follower=self.request.user, status=1).count()
@@ -48,6 +51,12 @@ class AuthPageView(View):
             return HttpResponseRedirect(reverse('home-page'))
 
         return render(request, 'auth/sign-in.html', {'error': True})
+
+
+class LogoutView(LoginRequiredMixin, View):
+    def get(self, request):
+        logout(request)
+        return HttpResponseRedirect(reverse('auth-page'))
 
 
 class MyProfilePageView(LoginRequiredMixin, ListView):

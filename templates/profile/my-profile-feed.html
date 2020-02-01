@@ -121,8 +121,13 @@
 
 												<div class="job_descp">
 													<h3>{{ post.title|default_if_none:"" }}</h3>
+                                                    <div id="owl-demo" class="owl-carousel owl-theme owl-margin">
+                                                        {% for img in post.postimage_set.all %}
+                                                            <div class="item"><img src="{{ img.image.url }}" alt="Owl Image"></div>
+                                                        {% endfor %}
+                                                    </div>
 
-													<p>{{ post.content|truncatechars:100 }}... <a href="#" title="">view more</a></p>
+													<p>{{ post.content|truncatechars:59 }} <a href="#" title="">view more</a></p>
 
 												</div>
 												<div class="job-status-bar">
@@ -449,7 +454,7 @@
                     alert("Error uploading background image!");
                 }
             })
-        })
+        });
         pbutton.click(function () {
             pfileupload.click();
         });
@@ -472,6 +477,20 @@
                 }
             })
         })
-    })
+    });
+
+    $(document).ready(function() {
+
+      $("#owl-demo").owlCarousel({
+
+          autoPlay: 3000, //Set AutoPlay to 3 seconds
+
+          items : 1,
+          itemsDesktop : [1199,3],
+          itemsDesktopSmall : [979,3]
+
+      });
+
+    });
     </script>
 {% endblock %}

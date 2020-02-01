@@ -18,3 +18,4 @@ class ProfilePhotoUpdateView(APIView):
         p = Profile.objects.get(user=self.request.user)
         p.photo.save(f.name, f, save=True)
         return Response(status=200)
+
