@@ -25,7 +25,7 @@
 										<ul class="user-fw-status">
 											<li>
 												<h4>Following</h4>
-												<span>{{ following_count }}</span>
+												<span id="following-count">{{ following_count }}</span>
 											</li>
 											<li>
 												<h4>Followers</h4>
@@ -192,8 +192,8 @@
 													<img src="{{user.profile.photo.url}}" alt="">
 													<h3>{{user.get_full_name|default_if_none:user.username}}</h3>
 													<span>{{user.profile.about|default_if_none:""}}</span>
-													<ul>
-														<li><a href="#" title="" class="followw">Follow</a></li>
+													<ul id="a-box{{ user.id }}">
+														<li><a href="#" title="" data-id="{{ user.id }}" class="followw">Follow</a></li>
 													</ul>
 													<a href="{% url 'guest-profile-page' user.username %}" title="">View Profile</a>
 												</div><!--user-profy end-->
@@ -534,6 +534,35 @@
         }
     });
     </script>
+     <script>
+    $(document).ready(function () {
+        $(".followw").click(function (e) {
+            e.preventDefault();
+            var data = new FormData();
+            var id = $(this).data('id');
+            var status = 1;
+            data.append("status", status);
+            data.append("target", id);
+
+            $.ajax({
+                          url: '{% url 'follow-block-api' %}',
+                          headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                          type: 'POST',
+                          data: data,
+                          processData: false,
+                          contentType: false,
+                          success: function (e) {
+                            location.reload()
+                          },
+                          error: function (e) {
+                              alert("Error creating new post!");
+                          }
+                      })
+
+        });
+    });
+
+    </script>
     <script>
         $(document).ready(function () {
             uploadImage();
@@ -664,6 +693,8 @@
                       })
     });
 
+
+
     $(".comment-send").click(function (e) {
         var data = new FormData();
         e.preventDefault();
@@ -708,5 +739,6 @@
 
 
     </script>
+
 {% endblock %}
 
